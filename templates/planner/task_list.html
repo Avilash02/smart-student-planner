@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}My Tasks – Smart Student Planner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">My Tasks</h1>
+    <p class="page-subtitle">Manage assignments, lab tasks, project work, and deadlines</p>
+  </div>
+  <a href="{% url 'task_add' %}" class="btn btn-primary">+ Add Task</a>
+</div>
+
+<!-- Filter tabs -->
+<div class="filter-tabs">
+  <a href="?status=all" class="filter-tab {% if status_filter == 'all' %}active{% endif %}">All</a>
+  <a href="?status=pending" class="filter-tab {% if status_filter == 'pending' %}active{% endif %}">Pending</a>
+  <a href="?status=completed" class="filter-tab {% if status_filter == 'completed' %}active{% endif %}">Completed</a>
+</div>
+
+{% if tasks %}
+<div class="task-list-container">
+  {% for task in tasks %}
+  <div class="task-card {% if task.is_overdue %}task-overdue{% elif task.is_due_today %}task-today{% elif task.is_completed %}task-done{% endif %}">
+
+    <!-- Status toggle -->
+    <form method="post" action="{% url 'task_toggle' task.pk %}" style="display:contents">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+      <button type="submit" class="task-check {% if task.is_completed %}task-check-done{% endif %}" title="Toggle completion">
+        {% if task.is_completed %}✓{% else %}○{% endif %}
+      </button>
+    </form>
+
+    <div class="task-body">
+      <div class="task-header-row">
+        <h3 class="task-name {% if task.is_completed %}text-strikethrough{% endif %}">{{ task.title }}</h3>
+        <div class="task-badges">
+          <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+          {% if task.is_overdue %}
+        <span class="badge badge-overdue">Overdue</span>
+          {% elif task.is_due_today %}
+            <span class="badge badge-today">Due Today</span>
+          {% elif task.is_due_tomorrow %}
+            <span class="badge badge-tomorrow">Due Tomorrow</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="task-meta">
+        <span>{{ task.subject }}</span>
+        <span>Due {{ task.due_date|date:"M j, Y" }}</span>
+        {% if task.description %}
+        <span title="{{ task.description }}">Note</span>
+        {% endif %}
+      </div>
+
+      {% if task.description %}
+      <p class="task-description">{{ task.description }}</p>
+      {% endif %}
+    </div>
+
+    <div class="task-actions">
+      <a href="{% url 'task_edit' task.pk %}" class="btn btn-outline btn-sm">Edit</a>
+      <a href="{% url 'task_delete' task.pk %}" class="btn btn-danger btn-sm">Delete</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+  <h2 class="empty-title">
+    {% if status_filter == 'completed' %}No completed tasks yet{% elif status_filter == 'pending' %}All caught up!{% else %}No tasks yet{% endif %}
+  </h2>
+  <p class="empty-msg">
+    {% if status_filter == 'completed' %}Complete a task and it will appear here.
+    {% elif status_filter == 'pending' %}Great, you have no pending tasks.
+    {% else %}Start by adding your first task, assignment, or project work.{% endif %}
+  </p>
+  {% if status_filter != 'completed' %}
+      <a href="{% url 'task_add' %}" class="btn btn-primary">+ Add Your First Task</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

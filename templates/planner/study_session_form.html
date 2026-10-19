@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Study Session – Smart Student Planner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ action }} Study Session</h1>
+    <p class="page-subtitle">{% if action == 'Add' %}Schedule study, coding practice, lab preparation, or project work.{% else %}Update this session.{% endif %}</p>
+  </div>
+  <a href="{% url 'study_plan' %}" class="btn btn-outline">← Back to Study Plan</a>
+</div>
+
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.subject.id_for_label }}">Subject / Topic / Work *</label>
+      {{ form.subject }}
+      {% if form.subject.errors %}<div class="field-error">{{ form.subject.errors.0 }}</div>{% endif %}
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="{{ form.study_date.id_for_label }}">Date *</label>
+        {{ form.study_date }}
+        {% if form.study_date.errors %}<div class="field-error">{{ form.study_date.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="id_start_time">Start Time (IST) *</label>
+        <div class="time-picker-wrapper">
+          <div class="time-picker-inputs">
+            <select id="time_hour" class="form-input form-select time-select" aria-label="Hour">
+              <option value="01">01</option>
+              <option value="02">02</option>
+              <option value="03">03</option>
+              <option value="04">04</option>
+              <option value="05">05</option>
+              <option value="06">06</option>
+              <option value="07">07</option>
+              <option value="08">08</option>
+              <option value="09" selected>09</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+            <span class="time-sep">:</span>
+            <select id="time_minute" class="form-input form-select time-select" aria-label="Minute">
+              <option value="00" selected>00</option>
+              <option value="05">05</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="35">35</option>
+              <option value="40">40</option>
+              <option value="45">45</option>
+              <option value="50">50</option>
+              <option value="55">55</option>
+            </select>
+            <select id="time_ampm" class="form-input form-select time-select time-ampm-select" aria-label="AM or PM">
+              <option value="AM" selected>AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
+          <input type="hidden" name="start_time" id="id_start_time" value="{{ form.start_time.value|time:'H:i'|default:form.start_time.value|default:'09:00' }}" />
+        </div>
+        <span class="form-hint">Indian Standard Time &middot; Select Hour, Minute, and AM / PM</span>
+        {% if form.start_time.errors %}<div class="field-error">{{ form.start_time.errors.0 }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.duration_minutes.id_for_label }}">Duration (minutes) *</label>
+      {{ form.duration_minutes }}
+      <span class="form-hint">e.g. 60 = 1 hour, 90 = 1.5 hours</span>
+      {% if form.duration_minutes.errors %}<div class="field-error">{{ form.duration_minutes.errors.0 }}</div>{% endif %}
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ action }} Session</button>
+      <a href="{% url 'study_plan' %}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const hourEl = document.getElementById('time_hour');
+  const minEl = document.getElementById('time_minute');
+  const ampmEl = document.getElementById('time_ampm');
+  const hiddenEl = document.getElementById('id_start_time');
+
+  function syncToHidden() {
+    let h = parseInt(hourEl.value, 10);
+    const m = minEl.value;
+    const ap = ampmEl.value;
+    if (ap === 'PM' && h < 12) h += 12;
+    if (ap === 'AM' && h === 12) h = 0;
+    const hh = String(h).padStart(2, '0');
+    hiddenEl.value = `${hh}:${m}`;
+  }
+
+  function initFromHidden() {
+    const val = (hiddenEl.value || '').trim();
+    if (!val) {
+      syncToHidden();
+      return;
+    }
+    const parts = val.split(':');
+    if (parts.length >= 2) {
+      let h24 = parseInt(parts[0], 10);
+      let m = parts[1].slice(0, 2);
+      let ap = h24 >= 12 ? 'PM' : 'AM';
+      let h12 = h24 % 12;
+      if (h12 === 0) h12 = 12;
+      hourEl.value = String(h12).padStart(2, '0');
+      let exists = false;
+      for (let i = 0; i < minEl.options.length; i++) {
+        if (minEl.options[i].value === m) { exists = true; break; }
+      }
+      if (!exists) {
+        const opt = new Option(m, m, true, true);
+        minEl.add(opt);
+      }
+      minEl.value = m;
+      ampmEl.value = ap;
+    }
+    syncToHidden();
+  }
+
+  hourEl.addEventListener('change', syncToHidden);
+  minEl.addEventListener('change', syncToHidden);
+  ampmEl.addEventListener('change', syncToHidden);
+
+  initFromHidden();
+});
+</script>
+{% endblock %}

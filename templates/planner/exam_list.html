@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Exams – Smart Student Planner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Exam Planner</h1>
+    <p class="page-subtitle">Keep track of your upcoming exams</p>
+  </div>
+  <a href="{% url 'exam_add' %}" class="btn btn-primary">+ Add Exam</a>
+</div>
+
+<!-- Upcoming exams -->
+<h2 class="section-heading">Upcoming Exams</h2>
+{% if upcoming %}
+<div class="exam-list">
+  {% for exam in upcoming %}
+  <div class="exam-card {% if exam.days_remaining == 0 %}exam-today{% elif exam.days_remaining <= 3 %}exam-soon{% endif %}">
+    <div class="exam-countdown-box">
+      {% if exam.days_remaining == 0 %}
+        <span class="big-count red-count">Today</span>
+      {% elif exam.days_remaining == 1 %}
+        <span class="big-count orange-count">Tomorrow</span>
+      {% else %}
+        <span class="big-count">{{ exam.days_remaining }}</span>
+        <span class="count-label">days left</span>
+      {% endif %}
+    </div>
+
+    <div class="exam-details">
+      <h3 class="exam-card-name">{{ exam.name }}</h3>
+      <div class="exam-card-meta">
+        <span>{{ exam.subject }}</span>
+        <span>{{ exam.exam_date|date:"l, F j, Y" }}</span>
+      </div>
+      {% if exam.notes %}
+      <p class="exam-notes">{{ exam.notes }}</p>
+      {% endif %}
+    </div>
+
+    <div class="exam-card-actions">
+      <a href="{% url 'exam_edit' exam.pk %}" class="btn btn-outline btn-sm">Edit</a>
+      <a href="{% url 'exam_delete' exam.pk %}" class="btn btn-danger btn-sm">Delete</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <h2 class="empty-title">No upcoming exams</h2>
+  <p class="empty-msg">Add your exam dates so you can plan ahead.</p>
+  <a href="{% url 'exam_add' %}" class="btn btn-primary">+ Add Your First Exam</a>
+</div>
+{% endif %}
+
+<!-- Past exams -->
+{% if past %}
+<h2 class="section-heading" style="margin-top:2rem; color: var(--text-muted);">Past Exams</h2>
+<div class="exam-list past-list">
+  {% for exam in past %}
+  <div class="exam-card exam-past">
+    <div class="exam-countdown-box">
+      <span class="big-count muted-count">Done</span>
+    </div>
+    <div class="exam-details">
+      <h3 class="exam-card-name text-muted">{{ exam.name }}</h3>
+      <div class="exam-card-meta">
+        <span>{{ exam.subject }}</span>
+        <span>{{ exam.exam_date|date:"M j, Y" }}</span>
+      </div>
+    </div>
+    <div class="exam-card-actions">
+      <a href="{% url 'exam_delete' exam.pk %}" class="btn btn-outline btn-sm">Remove</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

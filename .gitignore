@@ -1,0 +1,39 @@
+# Environment variables & secrets (CRITICAL: never commit real secrets)
+.env
+.env.local
+.env.*.local
+
+# Local SQLite databases
+*.sqlite3
+*.db
+
+# Python & bytecode cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Generated staticfiles (Render collects static on deploy)
+staticfiles/
+
+# Uploaded media files
+media/
+
+# IDE & Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Operating System temporary files
+.DS_Store
+Thumbs.db

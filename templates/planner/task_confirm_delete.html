@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ type }} – Smart Student Planner{% endblock %}
+
+{% block content %}
+<div class="page-center">
+  <div class="confirm-card">
+    <h1 class="confirm-title">Delete {{ type }}?</h1>
+    <p class="confirm-msg">
+      Are you sure you want to delete
+      <strong>
+        {% if type == 'Task' %}{{ object.title }}
+        {% elif type == 'Exam' %}{{ object.name }}
+        {% else %}{{ object.subject }} on {{ object.study_date|date:"M j" }}
+        {% endif %}
+      </strong>?
+      This cannot be undone.
+    </p>
+
+    <div class="confirm-actions">
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+      </form>
+      <a href="javascript:history.back()" class="btn btn-outline">Cancel</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

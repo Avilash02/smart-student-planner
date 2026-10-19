@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – Smart Student Planner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">
+      {{ greeting|default:"Hello" }}, {{ user.first_name|default:user.username }}! 👋
+    </h1>
+        <p class="page-subtitle">{{ today|date:"l, F j, Y" }}</p>
+  </div>
+  <a href="{% url 'task_add' %}" class="btn btn-primary">+ Add Task</a>
+</div>
+
+<!-- Stats cards -->
+<div class="stats-grid">
+  <div class="stat-card stat-blue">
+    <div class="stat-icon">📋</div>
+    <div class="stat-value">{{ pending_count }}</div>
+    <div class="stat-label">Pending Tasks</div>
+  </div>
+  <div class="stat-card stat-green">
+    <div class="stat-icon">✅</div>
+    <div class="stat-value">{{ completed_count }}</div>
+    <div class="stat-label">Completed</div>
+  </div>
+  <div class="stat-card stat-orange">
+    <div class="stat-icon">⚠️</div>
+    <div class="stat-value">{{ overdue|length }}</div>
+    <div class="stat-label">Overdue</div>
+  </div>
+  <div class="stat-card stat-purple">
+    <div class="stat-icon">📅</div>
+    <div class="stat-value">{{ upcoming_exams|length }}</div>
+    <div class="stat-label">Upcoming Exams</div>
+  </div>
+</div>
+
+<!-- Progress bar -->
+{% if has_tasks %}
+<div class="card progress-card">
+  <div class="card-header">
+    <h2 class="card-title">Overall Progress</h2>
+    <span class="progress-pct">{{ completion_pct }}%</span>
+  </div>
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill" style="width: {{ completion_pct }}%;" data-pct="{{ completion_pct }}%"></div>
+  </div>
+  <p class="progress-hint">{{ completed_count }} of {{ completed_count|add:pending_count }} tasks completed</p>
+</div>
+{% endif %}
+
+<!-- Smart suggestion -->
+{% if suggested_task %}
+<div class="card suggestion-card">
+  <div class="suggestion-label">💡 Suggested Task</div>
+  <div class="suggestion-title">{{ suggested_task.title }}</div>
+  <div class="suggestion-meta">
+    {{ suggested_task.subject }} &middot; Due {{ suggested_task.due_date|date:"M j" }}
+    &middot; <span class="badge badge-{{ suggested_task.priority }}">{{ suggested_task.get_priority_display }}</span>
+  </div>
+  <div class="suggestion-actions">
+    <form method="post" action="{% url 'task_toggle' suggested_task.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="/" />
+      <button type="submit" class="btn btn-success btn-sm">Mark Complete</button>
+    </form>
+    <a href="{% url 'task_edit' suggested_task.pk %}" class="btn btn-outline btn-sm">Edit</a>
+  </div>
+</div>
+{% endif %}
+
+<div class="dashboard-grid">
+  <!-- Due today & soon -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📌 Due Soon</h2>
+      <a href="{% url 'task_list' %}?status=pending" class="card-link">View all</a>
+    </div>
+    {% if due_today %}
+    <div class="section-label today-label">Today</div>
+    {% for task in due_today %}
+    <div class="task-row">
+      <form method="post" action="{% url 'task_toggle' task.pk %}" style="display:inline;">
+        {% csrf_token %}<input type="hidden" name="next" value="/" />
+        <button type="submit" class="check-btn" title="Mark complete">○</button>
+      </form>
+      <div class="task-info">
+        <span class="task-title">{{ task.title }}</span>
+        <span class="task-sub">{{ task.subject }}</span>
+      </div>
+      <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if due_soon %}
+    <div class="section-label">Upcoming</div>
+    {% for task in due_soon %}
+    <div class="task-row">
+      <form method="post" action="{% url 'task_toggle' task.pk %}" style="display:inline;">
+        {% csrf_token %}<input type="hidden" name="next" value="/" />
+        <button type="submit" class="check-btn" title="Mark complete">○</button>
+      </form>
+      <div class="task-info">
+        <span class="task-title">{{ task.title }}</span>
+        <span class="task-sub">{{ task.subject }} &middot; {{ task.due_date|date:"M j" }}</span>
+      </div>
+      <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if not due_today and not due_soon %}
+    <div class="empty-state-small">
+      <p>🎉 No upcoming tasks! <a href="{% url 'task_add' %}">Add one</a></p>
+    </div>
+    {% endif %}
+
+    <!-- Overdue -->
+    {% if overdue %}
+    <div class="section-label overdue-label">⚠️ Overdue</div>
+    {% for task in overdue %}
+    <div class="task-row overdue-row">
+      <form method="post" action="{% url 'task_toggle' task.pk %}" style="display:inline;">
+        {% csrf_token %}<input type="hidden" name="next" value="/" />
+        <button type="submit" class="check-btn" title="Mark complete">○</button>
+      </form>
+      <div class="task-info">
+        <span class="task-title">{{ task.title }}</span>
+        <span class="task-sub overdue-text">Was due {{ task.due_date|date:"M j" }}</span>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Upcoming Exams -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📝 Upcoming Exams</h2>
+      <a href="{% url 'exam_list' %}" class="card-link">View all</a>
+    </div>
+    {% if upcoming_exams %}
+    {% for exam in upcoming_exams %}
+    <div class="exam-row">
+      <div class="exam-countdown">
+        {% if exam.days_remaining == 0 %}
+        <span class="countdown today-count">Today!</span>
+        {% elif exam.days_remaining == 1 %}
+        <span class="countdown soon-count">Tomorrow</span>
+        {% else %}
+        <span class="countdown">{{ exam.days_remaining }}d</span>
+        {% endif %}
+      </div>
+      <div class="exam-info">
+        <span class="exam-name">{{ exam.name }}</span>
+        <span class="exam-sub">{{ exam.subject }} &middot; {{ exam.exam_date|date:"M j, Y" }}</span>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state-small">
+      <p>No upcoming exams. <a href="{% url 'exam_add' %}">Add one</a></p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

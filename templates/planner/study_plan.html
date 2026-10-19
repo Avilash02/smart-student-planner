@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Study Plan – Smart Student Planner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Daily Study Plan</h1>
+    <p class="page-subtitle">Plan your study sessions day by day</p>
+  </div>
+  <a href="{% url 'study_session_add' %}?date={{ view_date|date:'Y-m-d' }}" class="btn btn-primary">+ Add Session</a>
+</div>
+
+<!-- Date navigator -->
+<div class="date-nav">
+  <a href="?date={{ prev_date|date:'Y-m-d' }}" class="btn btn-outline btn-sm">← Previous</a>
+  <div class="date-display">
+    {% if view_date == today %}
+      <strong>Today</strong> – {{ view_date|date:"l, F j, Y" }}
+    {% else %}
+      {{ view_date|date:"l, F j, Y" }}
+    {% endif %}
+  </div>
+  <a href="?date={{ next_date|date:'Y-m-d' }}" class="btn btn-outline btn-sm">Next →</a>
+</div>
+{% if view_date != today %}
+<div style="text-align:center; margin-bottom:1rem;">
+  <a href="?date={{ today|date:'Y-m-d' }}" class="card-link">Go to Today</a>
+</div>
+{% endif %}
+
+<!-- Summary -->
+{% if sessions %}
+<div class="study-summary">
+  <span>{{ sessions|length }} session{{ sessions|length|pluralize }}</span>
+  <span>Total: {{ total_display }}</span>
+</div>
+
+<div class="study-list">
+  {% for session in sessions %}
+  <div class="study-card {% if session.is_completed %}study-done{% endif %}">
+    <div class="study-time-col">
+      <span class="study-time">{{ session.start_time|time:"g:i A" }}</span>
+      <span class="study-dur">{{ session.duration_display }}</span>
+    </div>
+
+    <div class="study-body">
+      <h3 class="study-subject {% if session.is_completed %}text-strikethrough{% endif %}">{{ session.subject }}</h3>
+      {% if session.is_completed %}
+        <span class="study-badge-done">Completed</span>
+      {% endif %}
+    </div>
+
+    <div class="study-actions">
+      <form method="post" action="{% url 'study_session_toggle' session.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm {% if session.is_completed %}btn-outline{% else %}btn-success{% endif %}">
+          {% if session.is_completed %}Reopen{% else %}Done{% endif %}
+        </button>
+      </form>
+      <a href="{% url 'study_session_edit' session.pk %}" class="btn btn-outline btn-sm">Edit</a>
+      <a href="{% url 'study_session_delete' session.pk %}" class="btn btn-danger btn-sm">Delete</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+  <h2 class="empty-title">No study sessions planned</h2>
+  <p class="empty-msg">
+    {% if view_date == today %}Plan your study time for today!{% else %}No sessions planned for this day.{% endif %}
+  </p>
+  <a href="{% url 'study_session_add' %}?date={{ view_date|date:'Y-m-d' }}" class="btn btn-primary">+ Add a Study Session</a>
+</div>
+{% endif %}
+{% endblock %}

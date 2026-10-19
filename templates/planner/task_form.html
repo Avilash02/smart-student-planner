@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Task – Smart Student Planner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ action }} Task</h1>
+    <p class="page-subtitle">{% if action == 'Add' %}Fill in the details below to add a new task, assignment, or project work.{% else %}Update the details below.{% endif %}</p>
+  </div>
+  <a href="{% url 'task_list' %}" class="btn btn-outline">← Back to Tasks</a>
+</div>
+
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.title.id_for_label }}">Task / Work Title *</label>
+      {{ form.title }}
+      {% if form.title.errors %}<div class="field-error">{{ form.title.errors.0 }}</div>{% endif %}
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="{{ form.subject.id_for_label }}">Subject / Course / Area *</label>
+        {{ form.subject }}
+        {% if form.subject.errors %}<div class="field-error">{{ form.subject.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="{{ form.due_date.id_for_label }}">Due Date *</label>
+        {{ form.due_date }}
+        {% if form.due_date.errors %}<div class="field-error">{{ form.due_date.errors.0 }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.priority.id_for_label }}">Priority</label>
+      {{ form.priority }}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.description.id_for_label }}">Description (optional)</label>
+      {{ form.description }}
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ action }} Task</button>
+      <a href="{% url 'task_list' %}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

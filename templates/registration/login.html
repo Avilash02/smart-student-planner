@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+{% block title %}Login – Smart Student Planner{% endblock %}
+
+{% block auth_content %}
+<div class="auth-card">
+  <div class="auth-header-wrap">
+    <div class="auth-brand-badge">🎓 Smart Student Planner</div>
+    <h1 class="auth-title">Welcome Back</h1>
+    <p class="auth-subtitle">Choose your preferred way to sign in</p>
+  </div>
+
+  <!-- Two options in the middle -->
+  <div class="auth-options {% if form.errors %}hidden{% endif %}" id="authOptions">
+    <!-- Option 1: Continue with Google -->
+    <form method="post" action="{% provider_login_url 'google' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-google">
+        <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+    </form>
+
+    <!-- Option 2: Continue with Email -->
+    <button type="button" class="btn-email-option" id="btnContinueEmail">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      <span>Continue with Email</span>
+    </button>
+  </div>
+
+  <!-- Email sign-in form (revealed when clicking Continue with Email) -->
+  <div class="email-auth-box {% if not form.errors %}hidden{% endif %}" id="emailAuthSection">
+    <button type="button" class="auth-back-link" id="btnBackToOptions">
+      ← Back to all options
+    </button>
+
+    {% if form.errors %}
+    <div class="alert alert-error">
+      Invalid username or password. Please try again.
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}" />
+
+      <div class="form-group">
+        <label class="form-label" for="id_username">Username or Email</label>
+        <input type="text" name="username" id="id_username" class="form-input"
+               placeholder="Enter your username or email" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="id_password">Password</label>
+        <input type="password" name="password" id="id_password" class="form-input"
+               placeholder="Enter your password" required />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+    </form>
+  </div>
+
+  <!-- Footer link -->
+  <p class="auth-link">
+    Don't have an account? <a href="{% url 'register' %}">Create account</a>
+  </p>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Smart Student Planner{% endblock %}</title>
+  <meta name="description" content="Smart Student Planner – organize your assignments, exams, and study sessions." />
+  {% load static %}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<!-- ===== Sidebar navigation ===== -->
+<div class="app-layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <span class="brand-name">Student Planner</span>
+      </div>
+    </div>
+
+    <ul class="nav-links">
+      <li>
+        <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+          Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'task_list' %}" class="nav-link {% if 'task' in request.resolver_match.url_name %}active{% endif %}">
+          My Tasks
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'exam_list' %}" class="nav-link {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
+          Exams
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'study_plan' %}" class="nav-link {% if 'study' in request.resolver_match.url_name %}active{% endif %}">
+          Study Plan
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{% if user.first_name %}{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}{% else %}{{ user.username|first|upper }}{% endif %}</div>
+        <div class="user-details">
+          <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+          <div class="user-role">Student</div>
+        </div>
+      </div>
+      <form method="post" action="{% url 'logout' %}" style="margin-top:0.5rem">
+        {% csrf_token %}
+        <button type="submit" class="btn-logout">Logout</button>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Mobile top bar -->
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" aria-label="Open menu">&#9776;</button>
+    <span class="topbar-title">Student Planner</span>
+    <span class="topbar-user">{{ user.username }}</span>
+  </header>
+
+  <!-- Overlay for mobile sidebar -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="main-content">
+    <!-- Flash messages -->
+    {% if messages %}
+    <div class="messages-container">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+{% else %}
+<!-- Unauthenticated layout -->
+<div class="auth-layout">
+  {% block auth_content %}{% endblock %}
+</div>
+{% endif %}
+
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
