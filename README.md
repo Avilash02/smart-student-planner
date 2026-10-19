@@ -2,20 +2,22 @@
 
 A modern, production-ready Django web application for students to manage tasks, exams, and daily study schedules with built-in Google OAuth 2.0 Single Sign-On and username/password authentication.
 
+🚀 **Live Deployment:** [https://smart-student-planner-n42l.onrender.com/](https://smart-student-planner-n42l.onrender.com/)
+
 ---
 
 ## 🌟 Key Features
 
 | Feature | Description |
 |---|---|
-| 🔐 **Dual Authentication** | Seamless 1-click Google Sign-In (OAuth 2.0) or standard Username/Email & Password |
-| 📋 **Task Management** | Full CRUD, priority sorting (High/Medium/Low), and one-click completion toggle |
-| ⚡ **Smart Highlighting** | Real-time indicators for overdue tasks, due today, and due tomorrow |
-| 📝 **Exam Tracker** | Countdown badges (Today!, Tomorrow, X days remaining) and upcoming/past separation |
-| 📚 **Study Planner** | Daily scheduled study sessions with duration tracking and completion checkoffs |
-| 📊 **Dynamic Dashboard** | Live stats, animated progress bar, and smart next-task recommendations |
-| 🛡️ **Security & Isolation** | Strict per-student data ownership; users cannot view or edit others' data |
-| 🚀 **Production-Ready** | Configured for Render deployment, WhiteNoise static files, and Neon PostgreSQL |
+|  **Dual Authentication** | Seamless 1-click Google Sign-In (OAuth 2.0) or standard Username/Email & Password |
+|  **Task Management** | Full CRUD, priority sorting (High/Medium/Low), and one-click completion toggle |
+|  **Smart Highlighting** | Real-time indicators for overdue tasks, due today, and due tomorrow |
+|  **Exam Tracker** | Countdown badges (Today!, Tomorrow, X days remaining) and upcoming/past separation |
+|  **Study Planner** | Daily scheduled study sessions with duration tracking and completion checkoffs |
+|  **Dynamic Dashboard** | Live stats, animated progress bar, and smart next-task recommendations |
+|  **Security & Isolation** | Strict per-student data ownership; users cannot view or edit others' data |
+|  **Production-Ready** | Deployed on Render with WhiteNoise static files and PostgreSQL support |
 
 ---
 
@@ -27,8 +29,8 @@ A modern, production-ready Django web application for students to manage tasks, 
 
 ### 2. Clone the repository & create a virtual environment
 ```bash
-git clone <your-repo-url>
-cd smart_student_planner
+git clone https://github.com/Avilash02/smart-student-planner.git
+cd smart-student-planner
 python -m venv venv
 ```
 Activate the virtual environment:
@@ -51,10 +53,10 @@ cp .env.example .env
 In your `.env` file:
 * Set `DJANGO_DEBUG=True`
 * Set `SECRET_KEY=your-local-dev-secret-key`
-* Leave `DATABASE_URL` empty to automatically use local SQLite (`db.sqlite3`)
+* Leave `DATABASE_URL` blank to automatically use local SQLite (`db.sqlite3`)
 * Fill in your `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (if testing Google Sign-In)
 
-### 5. Run database migrations & set default site
+### 5. Run database migrations
 ```bash
 python manage.py migrate
 ```
@@ -79,7 +81,7 @@ python manage.py test
 
 ## 🚀 Production Deployment on Render
 
-### Step 1: Create a Hosted PostgreSQL Database on Neon
+### Step 1: Create a Hosted PostgreSQL Database on Neon (Optional)
 1. Go to [Neon Console](https://console.neon.tech/) and create a free account.
 2. Click **Create Project** (e.g. `student-planner-db`).
 3. Under your project dashboard, find the **Connection Details** box.
@@ -88,36 +90,28 @@ python manage.py test
    postgresql://user:password@ep-sample-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require
    ```
 
-> [!NOTE]
-> Switching from SQLite to PostgreSQL creates a clean, dedicated production database. SQLite records stored on your personal computer do not automatically transfer to PostgreSQL.
+### Step 2: Configure Web Service on Render
+* **Name**: `smart-student-planner`
+* **Runtime**: `Python 3`
+* **Build Command**: `./build.sh`
+* **Start Command**: `gunicorn smart_student_planner.wsgi:application`
+* **Environment Variables**:
+  * `SECRET_KEY`: *(Auto-generated random key)*
+  * `DJANGO_DEBUG`: `False`
+  * `DATABASE_URL`: *(Your Neon PostgreSQL connection string)*
+  * `GOOGLE_CLIENT_ID`: *(Your Google OAuth Client ID)*
+  * `GOOGLE_CLIENT_SECRET`: *(Your Google OAuth Client Secret)*
+  * `SECURE_SSL_REDIRECT`: `True`
+  * `PYTHON_VERSION`: `3.12.8`
 
-### Step 2: Deploy to Render
-1. Push your project to GitHub (ensure `.env` and `db.sqlite3` are ignored via `.gitignore`).
-2. Log in to [Render](https://render.com/) and click **New + $\rightarrow$ Web Service**.
-3. Connect your GitHub repository.
-4. Configure the Web Service:
-   * **Name**: `smart-student-planner`
-   * **Runtime**: `Python 3`
-   * **Build Command**: `./build.sh`
-   * **Start Command**: `gunicorn smart_student_planner.wsgi:application`
-5. In the **Environment Variables** tab, add:
-   * `SECRET_KEY`: (Click *Generate* in Render or paste a 50+ character random string)
-   * `DJANGO_DEBUG`: `False`
-   * `DATABASE_URL`: (Paste your Neon PostgreSQL connection string)
-   * `GOOGLE_CLIENT_ID`: (Your Google OAuth Client ID)
-   * `GOOGLE_CLIENT_SECRET`: (Your Google OAuth Client Secret)
-   * `SECURE_SSL_REDIRECT`: `True`
-6. Click **Deploy Web Service**! Render will run `build.sh` (installing dependencies, collecting static files via WhiteNoise, and applying migrations) and launch your application with Gunicorn.
-
-### Step 3: Add Render Callback URL to Google Console
-Once Render assigns your public domain (e.g. `https://smart-student-planner.onrender.com`):
+### Step 3: Add Render Callback URL to Google Cloud Console
 1. Go to [Google Cloud Console](https://console.cloud.google.com/) $\rightarrow$ **APIs & Services $\rightarrow$ Credentials**.
 2. Open your OAuth 2.0 Client ID.
 3. Under **Authorized redirect URIs**, click **+ ADD URI** and add:
    ```text
-   https://smart-student-planner.onrender.com/accounts/google/login/callback/
+   https://smart-student-planner-n42l.onrender.com/accounts/google/login/callback/
    ```
-4. Save your changes.
+4. Click **Save**.
 
 ---
 
