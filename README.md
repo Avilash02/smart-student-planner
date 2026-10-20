@@ -23,9 +23,9 @@ A modern, production-ready Django web application for students to manage tasks, 
 
 ## Project Demonstration
 
-<video src="assets/Smart Student Planner .mp4" controls="controls" width="100%">
-  Your browser does not support the video tag.
-</video>
+[![Smart Student Planner Video Demonstration](https://img.youtube.com/vi/4L7Q_mUmg94/maxresdefault.jpg)](https://youtu.be/4L7Q_mUmg94)
+
+> **[Watch the full project walkthrough on YouTube](https://youtu.be/4L7Q_mUmg94)**
 
 ---
 
