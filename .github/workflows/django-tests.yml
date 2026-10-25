@@ -28,4 +28,4 @@ jobs:
         run: python manage.py test
         env:
           SECRET_KEY: test-secret-key-for-ci
-          DEBUG: "True"
+          DJANGO_DEBUG: "True"
