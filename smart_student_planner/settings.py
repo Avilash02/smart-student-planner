@@ -4,6 +4,7 @@ Configured for both local development (SQLite) and production deployment (Postgr
 """
 
 import os
+import sys
 from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
@@ -196,7 +197,7 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # ─── Production HTTPS & Security ──────────────────────────────────────────────
-if not DEBUG:
+if not DEBUG and 'test' not in sys.argv:
     # Tell Django to trust the Render HTTPS reverse proxy header
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True').lower() in ('true', '1', 'yes')
